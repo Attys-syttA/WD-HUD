@@ -342,6 +342,11 @@
       "tracked": true
     },
     {
+      "path": "tests/WdHud.Tests/LibreHardwareMonitorMetricsProviderTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
       "path": "tests/WdHud.Tests/WdHud.Tests.csproj",
       "role": "test",
       "tracked": true

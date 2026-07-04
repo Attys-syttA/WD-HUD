@@ -8,4 +8,7 @@
     <ProjectReference Include="..\WdHud.Core\WdHud.Core.csproj" />
     <PackageReference Include="LibreHardwareMonitorLib" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="WdHud.Tests" />
+  </ItemGroup>
 </Project>

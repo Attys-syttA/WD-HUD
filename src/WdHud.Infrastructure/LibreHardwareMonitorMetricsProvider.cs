@@ -20,7 +20,9 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
         {
             IsCpuEnabled = true,
             IsGpuEnabled = true,
-            IsMemoryEnabled = true
+            IsMemoryEnabled = true,
+            IsMotherboardEnabled = true,
+            IsControllerEnabled = true
         };
     }
 
@@ -61,6 +63,8 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
 
     private HudMetricsSnapshot ReadSnapshot(DateTime localTime, GpuSelectionMode gpuSelectionMode)
     {
+        computer.Accept(UpdateVisitor.Instance);
+
         var cpuUsage = 0d;
         var ramUsage = 0d;
         double? cpuTemperature = null;
@@ -68,12 +72,6 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
 
         foreach (var hardware in computer.Hardware)
         {
-            hardware.Update();
-            foreach (var subHardware in hardware.SubHardware)
-            {
-                subHardware.Update();
-            }
-
             switch (hardware.HardwareType)
             {
                 case HardwareType.Cpu:
@@ -88,7 +86,7 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
                 case HardwareType.GpuIntel:
                     gpuCandidates.Add(new GpuCandidate(
                         hardware.Name,
-                        IsDiscreteGpu(hardware),
+                        IsDiscreteGpu(hardware.HardwareType, hardware.Name),
                         ReadLoad(hardware),
                         ReadTemperature(hardware)));
                     break;
@@ -123,7 +121,7 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
 
     private static double? ReadLoad(IHardware hardware)
     {
-        return hardware.Sensors
+        return EnumerateSensors(hardware)
             .Where(sensor => sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
             .OrderByDescending(sensor => IsTotalSensor(sensor.Name))
             .Select(sensor => (double?)sensor.Value!.Value)
@@ -132,36 +130,113 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
 
     private static double? ReadTemperature(IHardware hardware)
     {
-        return hardware.Sensors
+        return SelectTemperature(
+            EnumerateSensors(hardware)
             .Where(sensor => sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
-            .OrderByDescending(sensor => IsPackageSensor(sensor.Name))
-            .Select(sensor => (double?)sensor.Value!.Value)
+            .Select(sensor => (sensor.Name, (double?)sensor.Value!.Value)));
+    }
+
+    internal static double? SelectTemperature(IEnumerable<(string Name, double? Value)> sensors)
+    {
+        return sensors
+            .Where(sensor => sensor.Value is > 0 && double.IsFinite(sensor.Value.Value))
+            .OrderByDescending(sensor => TemperatureSensorPriority(sensor.Name))
+            .Select(sensor => sensor.Value)
             .FirstOrDefault();
     }
 
-    private static bool IsDiscreteGpu(IHardware hardware)
+    private static IEnumerable<ISensor> EnumerateSensors(IHardware hardware)
     {
-        if (hardware.HardwareType == HardwareType.GpuNvidia)
+        foreach (var sensor in hardware.Sensors)
+        {
+            yield return sensor;
+        }
+
+        foreach (var subHardware in hardware.SubHardware)
+        {
+            foreach (var sensor in EnumerateSensors(subHardware))
+            {
+                yield return sensor;
+            }
+        }
+    }
+
+    internal static bool IsDiscreteGpu(HardwareType hardwareType, string hardwareName)
+    {
+        if (hardwareType == HardwareType.GpuNvidia)
         {
             return true;
         }
 
-        if (hardware.HardwareType == HardwareType.GpuAmd)
+        if (hardwareType == HardwareType.GpuAmd)
         {
-            return !hardware.Name.Contains("integrated", StringComparison.OrdinalIgnoreCase)
-                && !hardware.Name.Contains("radeon graphics", StringComparison.OrdinalIgnoreCase);
+            var normalizedName = NormalizeGpuName(hardwareName);
+            return !normalizedName.Contains("integrated", StringComparison.OrdinalIgnoreCase)
+                && !normalizedName.Contains("radeon graphics", StringComparison.OrdinalIgnoreCase);
         }
 
         return false;
     }
+
+    private static string NormalizeGpuName(string value)
+        => value
+            .Replace("(TM)", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Replace("(R)", string.Empty, StringComparison.OrdinalIgnoreCase);
 
     private static bool IsTotalSensor(string name)
         => name.Contains("total", StringComparison.OrdinalIgnoreCase)
             || name.Contains("core", StringComparison.OrdinalIgnoreCase)
             || name.Contains("memory", StringComparison.OrdinalIgnoreCase);
 
-    private static bool IsPackageSensor(string name)
-        => name.Contains("package", StringComparison.OrdinalIgnoreCase)
-            || name.Contains("core", StringComparison.OrdinalIgnoreCase)
-            || name.Contains("gpu", StringComparison.OrdinalIgnoreCase);
+    private static int TemperatureSensorPriority(string name)
+    {
+        if (name.Contains("tctl", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("tdie", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("package", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("gpu core", StringComparison.OrdinalIgnoreCase))
+        {
+            return 3;
+        }
+
+        if (name.Contains("core", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("cpu", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("gpu", StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        return 1;
+    }
+
+    private sealed class UpdateVisitor : IVisitor
+    {
+        public static readonly UpdateVisitor Instance = new();
+
+        private UpdateVisitor()
+        {
+        }
+
+        public void VisitComputer(IComputer computer)
+        {
+            computer.Traverse(this);
+        }
+
+        public void VisitHardware(IHardware hardware)
+        {
+            hardware.Update();
+
+            foreach (var subHardware in hardware.SubHardware)
+            {
+                subHardware.Accept(this);
+            }
+        }
+
+        public void VisitParameter(IParameter parameter)
+        {
+        }
+
+        public void VisitSensor(ISensor sensor)
+        {
+        }
+    }
 }

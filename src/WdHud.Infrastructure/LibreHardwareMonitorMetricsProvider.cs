@@ -9,6 +9,7 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
     private readonly Computer computer;
     private readonly GpuSelectionPolicy gpuSelectionPolicy;
     private readonly HudMetricsNormalizer normalizer;
+    private bool isOpen;
     private bool disposed;
 
     public LibreHardwareMonitorMetricsProvider(GpuSelectionPolicy gpuSelectionPolicy, HudMetricsNormalizer normalizer)
@@ -21,7 +22,6 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             IsGpuEnabled = true,
             IsMemoryEnabled = true
         };
-        computer.Open();
     }
 
     public Task<HudMetricsSnapshot> GetSnapshotAsync(GpuSelectionMode gpuSelectionMode, CancellationToken cancellationToken)
@@ -29,6 +29,38 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
         cancellationToken.ThrowIfCancellationRequested();
 
         var localTime = DateTime.Now;
+        try
+        {
+            EnsureOpen();
+            return Task.FromResult(ReadSnapshot(localTime, gpuSelectionMode));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+            return Task.FromResult(HudMetricsSnapshot.Empty(localTime));
+        }
+    }
+
+    public void Dispose()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        if (isOpen)
+        {
+            computer.Close();
+        }
+
+        disposed = true;
+    }
+
+    private HudMetricsSnapshot ReadSnapshot(DateTime localTime, GpuSelectionMode gpuSelectionMode)
+    {
         var cpuUsage = 0d;
         var ramUsage = 0d;
         double? cpuTemperature = null;
@@ -75,18 +107,18 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             SelectedGpuName: selectedGpu?.Name,
             IsGpuDiscrete: selectedGpu?.IsDiscrete ?? false);
 
-        return Task.FromResult(normalizer.Normalize(snapshot));
+        return normalizer.Normalize(snapshot);
     }
 
-    public void Dispose()
+    private void EnsureOpen()
     {
-        if (disposed)
+        if (isOpen)
         {
             return;
         }
 
-        computer.Close();
-        disposed = true;
+        computer.Open();
+        isOpen = true;
     }
 
     private static double? ReadLoad(IHardware hardware)

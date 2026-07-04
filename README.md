@@ -23,11 +23,13 @@ It is planned as a native C#/.NET/WPF application that displays:
 
 ## Current Status
 
-Bootstrap is in progress. The local machine currently does not expose the `dotnet` CLI, so build validation is blocked until the .NET SDK is installed or added to PATH.
+Bootstrap is complete and local validation is available. The machine has the .NET 10 SDK installed; `scripts/local-build.ps1` restores, builds, tests, and runs the local safety checks.
+
+The current MVP scaffold includes Contracts/Core models, a LibreHardwareMonitor-based `ISystemMetricsProvider`, null-safe metric normalization, and a minimal WPF HUD window. Manual visible HUD smoke testing is still open.
 
 ## Build
 
-After installing the .NET 10 SDK:
+With the .NET 10 SDK installed:
 
 ```powershell
 pwsh -File scripts/local-build.ps1

@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$excludedDirectories = @('.git', 'bin', 'obj', '.vs', 'TestResults', 'artifacts', 'publish')
+$excludedDirectories = @('.git', '.serena', 'bin', 'obj', '.vs', 'TestResults', 'artifacts', 'publish')
 $crlfAllowedExtensions = @('.ps1', '.bat', '.cmd', '.sln')
 
 $issues = @()

@@ -6,9 +6,9 @@ This plan was imported from `C:\Users\gép\Downloads\v2.txt` and is the active i
 
 ## Current Status
 
-- Status: Bootstrap through initial MVP scaffold completed locally.
+- Status: Bootstrap through first metrics snapshot hardening completed locally.
 - Current repo relation: local repository initialized in `E:\codex_works\WD_HUD`.
-- Completed parts: local git repository and remote configured; solution, projects, docs, scripts, tests, CI, and inventory created; build/test/security/inventory validation passed.
+- Completed parts: local git repository and remote configured; solution, projects, docs, scripts, tests, CI, inventory, Contracts/Core models, LibreHardwareMonitor metrics provider, null-safe snapshot normalization, and minimal WPF HUD shell created; build/test/security/inventory/encoding validation passed.
 - Open parts: manual visible HUD smoke test and firewall rule test after publish.
 
 ## 1. Goal

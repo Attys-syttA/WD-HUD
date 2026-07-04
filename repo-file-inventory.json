@@ -327,6 +327,11 @@
       "tracked": true
     },
     {
+      "path": "tests/WdHud.Tests/HudMetricsNormalizerTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
       "path": "tests/WdHud.Tests/HudSettingsValidatorTests.cs",
       "role": "test",
       "tracked": true

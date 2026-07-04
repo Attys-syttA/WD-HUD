@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $inventoryPath = Join-Path $repoRoot 'repo-file-inventory.json'
 
-$excludedDirectories = @('.git', 'bin', 'obj', '.vs', 'node_modules')
+$excludedDirectories = @('.git', '.serena', 'bin', 'obj', '.vs', 'node_modules')
 
 $files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
   Where-Object {

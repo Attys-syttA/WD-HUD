@@ -1,5 +1,16 @@
 # CHANGELOG.dev
 
+## 2026-07-04 - First metrics snapshot hardening
+
+- Goal: align README/STATE with the installed .NET SDK and continue the next MVP phase without adding extra features.
+- Modified files: `README.md`, `CODEX_AGENT_PLAN.md`, `STATE.md`, `docs/CHANGELOG.dev.md`, `Directory.Build.props`, `.gitignore`, `scripts/update-inventory.ps1`, `scripts/check-encoding.ps1`, `src/WdHud.Core/HudMetricsNormalizer.cs`, `src/WdHud.Infrastructure/LibreHardwareMonitorMetricsProvider.cs`, `tests/WdHud.Tests/HudMetricsNormalizerTests.cs`, `repo-file-inventory.json`.
+- Commands run:
+  - `pwsh -File .\scripts\update-inventory.ps1`
+  - `pwsh -File .\scripts\local-build.ps1`
+  - `ggshield secret scan path --recursive --yes --use-gitignore .`
+- Result: README no longer says `dotnet` is blocked; `LibreHardwareMonitorMetricsProvider` opens sensors lazily and returns an empty snapshot on local sensor-read failure; `HudMetricsNormalizer` removes NaN/Infinity values. Version bumped to `0.1.00002` because runtime behavior changed.
+- Open follow-up: manual visible WPF HUD smoke test.
+
 ## 2026-07-04 - Bootstrap start
 
 - Goal: start the `WD-HUD` repository from the user-provided `CODEX_AGENT_PLAN.md`.

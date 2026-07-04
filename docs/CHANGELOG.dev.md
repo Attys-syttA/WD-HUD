@@ -3,10 +3,10 @@
 ## 2026-07-04 - CI inventory determinism fix
 
 - Goal: fix the GitHub Actions `Inventory Check` and aggregate `CI` failures on commit `1e5bb40`.
-- Root cause: `scripts/update-inventory.ps1` generated inventory from a raw filesystem crawl. GitHub Actions clean checkout and local runtime/build state can differ, so the CI runner rewrote `repo-file-inventory.json` and failed with `repo-file-inventory.json was stale and has been updated`.
-- Modified files: `scripts/update-inventory.ps1`, `STATE.md`, `docs/CHANGELOG.dev.md`.
-- Result: inventory generation now uses `git ls-files`, so the inventory is based on tracked repository files rather than machine-local filesystem state.
-- Validation: after stopping the locally running HUD process that locked Release DLLs, `pwsh -File .\scripts\local-build.ps1`, `pwsh -File .\scripts\check-inventory.ps1`, `pwsh -File .\scripts\check-encoding.ps1`, `ggshield secret scan path --recursive --yes --use-gitignore .`, and `git diff --check` passed. Tests passed: 26.
+- Root cause: `scripts/update-inventory.ps1` generated inventory from a raw filesystem crawl, and `scripts/check-inventory.ps1` rewrote then byte-compared JSON text. GitHub Actions clean checkout and local runtime/build state can differ, and JSON text formatting can vary, so the CI runner failed with `repo-file-inventory.json was stale and has been updated`.
+- Modified files: `scripts/update-inventory.ps1`, `scripts/check-inventory.ps1`, `STATE.md`, `docs/CHANGELOG.dev.md`.
+- Result: inventory generation now uses `git ls-files`, and inventory checking compares normalized `path|role|tracked` entries without rewriting `repo-file-inventory.json`.
+- Validation: after stopping the locally running HUD process that locked Release DLLs, `pwsh -File .\scripts\update-inventory.ps1`, `pwsh -File .\scripts\check-inventory.ps1`, `pwsh -File .\scripts\local-build.ps1`, `pwsh -File .\scripts\check-encoding.ps1`, `ggshield secret scan path --recursive --yes --use-gitignore .`, and `git diff --check` passed. Tests passed: 26.
 - Version bump: not needed; this is CI/tooling behavior only, not application runtime behavior.
 
 ## 2026-07-04 - Startup, tray minimize, and draggable HUD

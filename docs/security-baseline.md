@@ -13,6 +13,7 @@ Last updated: 2026-07-04
 - no embedded browser or WebView
 - no hidden background service
 - no web dependency during normal runtime
+- administrator elevation is used only for local hardware sensor access
 
 ## Forbidden APIs And Patterns
 
@@ -49,6 +50,8 @@ False positives are acceptable. A match must be reviewed before continuing.
 - current-user startup registration
 - local JSON settings under `%LocalAppData%\WD-HUD\settings.json`
 - Windows API calls for window click-through behavior
+- notification-area icon for minimize/restore/exit
+- app manifest requesting administrator rights for local hardware sensor access
 - Windows Defender Firewall scripts for optional outbound blocking
 
 ## Scan Strategy

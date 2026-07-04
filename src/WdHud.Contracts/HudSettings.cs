@@ -6,7 +6,7 @@ public sealed class HudSettings
     public double WindowTop { get; init; } = -1;
     public double Opacity { get; init; } = 0.82;
     public bool ClickThroughEnabled { get; init; }
-    public bool StartWithWindows { get; init; }
+    public bool StartWithWindows { get; init; } = true;
     public bool ShowTime { get; init; } = true;
     public bool ShowCpuUsage { get; init; } = true;
     public bool ShowRamUsage { get; init; } = true;

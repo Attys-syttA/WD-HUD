@@ -5,7 +5,7 @@
 - Date: 2026-07-04
 - Repo: `E:\codex_works\WD_HUD`
 - Phase: MVP scaffold through first visible HUD smoke test
-- Status: solution, projects, contracts, core logic, LibreHardwareMonitor metrics provider, null-safe snapshot normalization, WPF HUD shell, tests, docs, scripts, CI/workflows, inventory, first manual HUD smoke test, GPU temperature/dGPU selection bugfix, and invalid CPU temperature filtering are complete.
+- Status: solution, projects, contracts, core logic, LibreHardwareMonitor metrics provider, null-safe snapshot normalization, WPF HUD shell, tests, docs, scripts, CI/workflows, inventory, first manual HUD smoke test, GPU temperature/dGPU selection bugfix, invalid CPU temperature filtering, explicit elevated runtime manifest, first status-color HUD values, startup registration, tray minimize/restore, and draggable HUD behavior are complete.
 
 ## Open Items
 
@@ -13,11 +13,18 @@
 - Manual smoke test confirmed the visible WPF HUD starts, stays topmost, renders the expected fields, updates values, and tolerates unavailable sensors without crashing.
 - GPU temperature identification bug is fixed: `AMD Radeon(TM) Graphics` is now classified as integrated, so Auto mode selects the discrete `NVIDIA GeForce RTX 5080` when both GPUs are present.
 - CPU temperature no longer displays a false `0°C`; invalid zero temperature readings are filtered and shown as `N/A`.
-- Actual CPU temperature still needs a usable in-app sensor source on this machine. LibreHardwareMonitor currently reports `Core (Tctl/Tdie) = 0`, and Windows ACPI/WMI thermal probes did not return a usable CPU temperature.
+- CPU temperature is available in-app when WD-HUD runs elevated through its manifest; non-elevated probes could not access the usable CPU sensor path on this machine.
 - HWiNFO64 Sensors view confirms the hardware does expose real CPU temperatures: `CPU (Tctl/Tdie)` around `64.1 °C`, CPU package/case around `61.8 °C`, CCD/IOD/core temperatures also visible.
 - HWiNFO64 shared-memory export is not accepted as an MVP baseline runtime dependency because the free version is limited to 12 hours and requires manual reactivation.
 - LibreHardwareMonitor was switched to its `IVisitor`/`Accept` refresh pattern; this kept GPU readings working but did not make a real CPU temperature available on this machine.
-- Firewall rule creation was not executed because no published executable path was requested for local firewall changes.
+- Elevated WD-HUD provider probe confirmed the root cause: with administrator rights, the same provider reads CPU temperature (`CpuTemperatureC` around `66.75 °C`), GPU temperature, and the NVIDIA dGPU correctly.
+- WD-HUD now requests administrator rights through `src/WdHud.App/app.manifest`; this is accepted for the single-user target machine and is limited to local hardware sensor access.
+- The elevated runtime decision does not relax the no-network, no-telemetry, no-updater, no-cloud, no-remote-config, and no-WebView baseline.
+- Outbound Windows Defender Firewall block rule was created and verified for the current Release `WdHud.App.exe` path.
+- HUD metric values now use status colors: cool blue, optimal green, warm orange, and critical red for CPU/RAM/GPU load and CPU/GPU temperature.
+- `StartWithWindows` now defaults to enabled and registers the current `WdHud.App.exe` under the current user's Run key.
+- Startup registration points directly at the `WinExe` app executable, not at `cmd`, PowerShell, or a wrapper script.
+- The HUD can be dragged, minimized to the notification area, restored from the tray icon, and exited from the tray menu.
 - Remote is configured as `https://github.com/Attys-syttA/WD-HUD.git`.
 
 ## Recent Decisions
@@ -28,7 +35,7 @@
 - `WindowsEdgeLight` and `glassmorphism-wpf` are reference-only sources.
 - The repository starts with tracked `STATE.md`, `docs/CHANGELOG.dev.md`, task folders, and full file inventory discipline.
 - Target framework is `net10.0` / `net10.0-windows`, matching the installed local SDK/runtime.
-- Current version is `0.1.00004`; the patch5 bump was needed for invalid CPU temperature filtering after the GPU temperature/dGPU selection bugfix.
+- Current version is `0.1.00007`; the patch5 bump was needed because startup and window behavior changed.
 - GitHub Actions are split into `ci.yml`, `build-check.yml`, `security-scan.yml`, `inventory-check.yml`, `encoding-check.yml`, and `secret-scan.yml`.
 - The first metrics provider is `LibreHardwareMonitorMetricsProvider`; it opens LibreHardwareMonitor lazily and returns `HudMetricsSnapshot.Empty(...)` if local sensor reading fails.
 - `HudMetricsNormalizer` clamps percent values and removes non-finite sensor values before the HUD formats them.
@@ -42,11 +49,22 @@
   - `ggshield secret scan path --recursive --yes --use-gitignore .`
 - Result:
   - build succeeded
-  - tests passed: 10 passed, 0 failed
+  - tests passed: 26 passed, 0 failed
   - security scan passed
   - inventory check passed
   - encoding check passed
   - GitGuardian scan found no secrets
+  - app manifest build succeeded with administrator execution level
+  - manifest-built Release `WdHud.App.exe` started successfully as a visible runtime smoke test
+  - outbound Windows Defender Firewall block rule was created and verified for the current Release executable
+  - user-visible elevated HUD smoke test confirmed `CPU °C 66°C` and `GPU °C 40°C`
+  - status-color policy tests passed for load and temperature thresholds
+  - colored-HUD visual launch was attempted, but the elevated start was canceled by the user before the window opened
+  - startup/tray/draggable behavior built successfully
+  - fresh Release `WdHud.App.exe` started successfully after the startup/tray changes
+  - HKCU Run value `WD-HUD` was verified and points directly to the current Release `WdHud.App.exe`
+  - user-visible smoke test confirmed drag movement and tray minimize/restore work
+  - user-visible smoke test confirmed colored HUD values render as expected
 - Manual smoke test:
   - Release `WdHud.App.exe` started and remained running.
   - Visible `WD-HUD` top-level WPF window was detected.
@@ -63,11 +81,14 @@
     - Windows ACPI/WMI thermal probes did not return a usable CPU temperature.
     - LHM `IVisitor`/`Accept` refresh pattern still produced `CpuTemperatureC = null` after invalid zero filtering.
     - HWiNFO64 Sensors view showed real CPU telemetry, including `CPU (Tctl/Tdie)` around `64.1 °C`, proving the sensor exists but is not exposed correctly through the current LibreHardwareMonitor path.
+    - Elevated WD-HUD provider probe returned `CpuTemperatureC = 66.75 °C`, proving administrator rights unlock the needed sensor access.
+    - App manifest now requests administrator rights so normal app launch uses the same sensor-access mode.
     - Visible HUD re-check showed `CPU °C N/A` instead of false `0°C`, while `GPU °C` still showed a real value.
+    - User-visible elevated HUD smoke test confirmed the final app now renders CPU temperature as `CPU °C 66°C` and GPU temperature as `GPU °C 40°C`.
 
 ## Next Step
 
-- Investigate a real CPU temperature source separately. HWiNFO64 can see the data, but its free shared-memory export is time-limited/manual, so the preferred MVP route remains a newer/different LibreHardwareMonitor-compatible path for this ASRock X870E Taichi / Ryzen 9 9950X3D setup.
+- Commit and push the validated startup/tray/drag/status-color checkpoint after user confirmation.
 - Continue to publish or commit only after user confirmation.
 
 ## Operational Notes

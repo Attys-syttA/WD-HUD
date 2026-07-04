@@ -25,7 +25,15 @@ It is planned as a native C#/.NET/WPF application that displays:
 
 Bootstrap is complete and local validation is available. The machine has the .NET 10 SDK installed; `scripts/local-build.ps1` restores, builds, tests, and runs the local safety checks.
 
-The current MVP scaffold includes Contracts/Core models, a LibreHardwareMonitor-based `ISystemMetricsProvider`, null-safe metric normalization, and a minimal WPF HUD window. Manual visible HUD smoke testing is still open.
+The current MVP scaffold includes Contracts/Core models, a LibreHardwareMonitor-based `ISystemMetricsProvider`, null-safe metric normalization, and a minimal WPF HUD window. Manual visible HUD smoke testing confirmed that the window opens, stays topmost, renders the expected fields, and updates safely when some sensors are unavailable.
+
+Metric values are color-coded by status: cool blue, optimal green, warm orange, and critical red. Unknown values remain white and render as `N/A`.
+
+The HUD starts with Windows by registering the current `WdHud.App.exe` under the current user's Run key. It is a `WinExe` app, so startup uses the executable directly rather than opening a command window. The HUD can be dragged, minimized to the notification area, and restored from the tray icon.
+
+## Elevation
+
+WD-HUD requests administrator rights because reliable CPU temperature access through LibreHardwareMonitor requires elevated local sensor access on the target machine. The elevation is only for local hardware sensor reading; the app still has no runtime network, telemetry, updater, cloud, remote-config, or WebView behavior by design.
 
 ## Build
 

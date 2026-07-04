@@ -1,5 +1,41 @@
 # CHANGELOG.dev
 
+## 2026-07-04 - Startup, tray minimize, and draggable HUD
+
+- Goal: make WD-HUD behave like a small desktop utility that can start with Windows, stay out of the taskbar, and be moved by the user.
+- Modified files: `Directory.Build.props`, `README.md`, `STATE.md`, `docs/acceptance-checklist.md`, `docs/CHANGELOG.dev.md`, `docs/security-baseline.md`, `docs/threat-surface.md`, `src/WdHud.App/App.xaml.cs`, `src/WdHud.App/MainWindow.xaml`, `src/WdHud.App/MainWindow.xaml.cs`, `src/WdHud.App/WdHud.App.csproj`, `src/WdHud.Contracts/HudSettings.cs`, `tests/WdHud.Tests/HudSettingsValidatorTests.cs`, `repo-file-inventory.json`.
+- Result: `StartWithWindows` defaults to enabled; the app registers the current `WdHud.App.exe` under the current user's Run key; the HUD can be dragged; the corner button minimizes it to the notification area; the tray icon can restore or exit the app.
+- Startup behavior: the registration points directly at the `WinExe` executable, not at `cmd`, PowerShell, or a wrapper script.
+- Validation: `pwsh -File .\scripts\update-inventory.ps1`, `pwsh -File .\scripts\local-build.ps1`, `ggshield secret scan path --recursive --yes --use-gitignore .`, and `git diff --check` passed. Tests passed: 26. Fresh Release `WdHud.App.exe` started successfully, HKCU Run was verified to point directly to the current Release executable, and user-visible smoke test confirmed drag movement plus tray minimize/restore. Version bumped to `0.1.00007` because startup and window behavior changed.
+
+## 2026-07-04 - HUD status colors
+
+- Goal: color existing HUD values by status without adding new metrics or network behavior.
+- Modified files: `Directory.Build.props`, `STATE.md`, `docs/acceptance-checklist.md`, `docs/CHANGELOG.dev.md`, `src/WdHud.App/HudViewModel.cs`, `src/WdHud.App/MainWindow.xaml`, `src/WdHud.Core/HudMetricSeverity.cs`, `src/WdHud.Core/HudMetricStatusPolicy.cs`, `tests/WdHud.Tests/HudMetricStatusPolicyTests.cs`, `repo-file-inventory.json`.
+- Result: CPU/RAM/GPU load and CPU/GPU temperature values now use blue for cool, green for optimal, orange for warm, and red for critical. Unknown values remain white.
+- Thresholds: load `<20` blue, `20-69` green, `70-89` orange, `90+` red; temperature `<45°C` blue, `45-74°C` green, `75-84°C` orange, `85°C+` red.
+- Validation: `pwsh -File .\scripts\update-inventory.ps1`, `pwsh -File .\scripts\local-build.ps1`, `ggshield secret scan path --recursive --yes --use-gitignore .`, and `git diff --check` passed. Tests passed: 25. Version bumped to `0.1.00006` because user-visible HUD behavior changed.
+- Visual follow-up: user-visible smoke test confirmed the colored HUD values render on the desktop.
+
+## 2026-07-04 - Admin elevation runtime decision
+
+- Goal: make the accepted runtime mode explicit after proving that administrator rights unlock CPU temperature access on the target machine.
+- Modified files: `Directory.Build.props`, `README.md`, `STATE.md`, `docs/acceptance-checklist.md`, `docs/CHANGELOG.dev.md`, `docs/security-baseline.md`, `docs/threat-surface.md`, `src/WdHud.App/WdHud.App.csproj`, `src/WdHud.App/app.manifest`, `repo-file-inventory.json`.
+- Decision: WD-HUD now requests administrator rights through its application manifest. The elevation is only for local LibreHardwareMonitor sensor access.
+- Result: version bumped to `0.1.00005` because runtime security behavior changed.
+- Validation: `pwsh -File .\scripts\update-inventory.ps1`, `pwsh -File .\scripts\local-build.ps1`, `ggshield secret scan path --recursive --yes --use-gitignore .`, and `git diff --check` passed. Tests passed: 15. Manifest-built Release `WdHud.App.exe` started successfully, and user-visible elevated HUD smoke test confirmed `CPU °C 66°C` and `GPU °C 40°C`.
+- Network hardening: `scripts/block-network.ps1` was run elevated for the current Release `WdHud.App.exe`, and `scripts/verify-no-network.ps1` confirmed the outbound block rule exists.
+- Guardrail: the no-network, no-telemetry, no-updater, no-cloud, no-remote-config, and no-WebView baseline remains unchanged.
+
+## 2026-07-04 - Elevated CPU temperature probe
+
+- Goal: verify whether administrator rights change LibreHardwareMonitor CPU temperature availability inside WD-HUD.
+- Modified files: `STATE.md`, `docs/acceptance-checklist.md`, `docs/CHANGELOG.dev.md`.
+- Commands/probes run:
+  - elevated temporary PowerShell provider probe loading the WD-HUD Release DLLs
+- Result: with administrator rights, the same WD-HUD provider returned `CpuTemperatureC = 66.75 °C`, `GpuTemperatureC = 39.81 °C`, and `SelectedGpuName = NVIDIA GeForce RTX 5080`.
+- Decision impact: the CPU temperature issue is now confirmed as a permissions/driver-access problem for non-elevated runs, not a missing hardware sensor or mismatched LibreHardwareMonitor DLL. Normal non-elevated runtime should keep the safe `N/A` fallback unless an explicit elevated mode is chosen.
+
 ## 2026-07-04 - Invalid CPU temperature filtering
 
 - Goal: fix the manual smoke-test bug where CPU temperature displayed as false `0°C`.

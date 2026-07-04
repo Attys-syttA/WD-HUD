@@ -17,4 +17,10 @@ public sealed class HudSettingsValidatorTests
         Assert.Equal(0.25, low.Opacity);
         Assert.Equal(1.0, high.Opacity);
     }
+
+    [Fact]
+    public void Default_StartsWithWindows()
+    {
+        Assert.True(HudSettings.Default.StartWithWindows);
+    }
 }

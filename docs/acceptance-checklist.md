@@ -14,13 +14,20 @@ Last updated: 2026-07-04
 - [x] GPU value is a number or `N/A`.
 - [x] CPU temperature is a number or `N/A`.
 - [x] GPU temperature is detected for the NVIDIA dGPU on the target machine.
+- [x] Elevated runtime can read CPU temperature on the target machine.
+- [x] CPU/RAM/GPU load values have status colors.
+- [x] CPU/GPU temperature values have status colors.
 - [x] Multiple-GPU selection is handled by the core policy tests.
 - [x] Missing sensor values do not crash the app.
 - [ ] Settings are saved and restored.
 - [x] Always-on-top works.
+- [x] HUD can be dragged to a new screen position.
+- [x] HUD can be minimized to the notification area.
+- [x] Notification-area icon can restore the HUD.
+- [x] Startup registration is current-user scoped and uses the app executable directly.
 - [ ] Click-through can be enabled.
-- [ ] Outbound network block script can create a rule.
-- [ ] Verify script can detect the rule.
+- [x] Outbound network block script can create a rule.
+- [x] Verify script can detect the rule.
 - [x] No updater exists.
 - [x] No telemetry exists.
 - [x] No analytics exists.
@@ -51,4 +58,27 @@ Last updated: 2026-07-04
 - LHM `IVisitor`/`Accept` refresh pattern was tested; GPU readings still worked, but CPU temperature remained unavailable after invalid zero filtering.
 - HWiNFO64 Sensors view confirmed real CPU telemetry is available on the machine: `CPU (Tctl/Tdie)` around `64.1 °C`, CPU package/case around `61.8 °C`, plus CCD/IOD/core temperatures.
 - HWiNFO64 shared-memory export is not an MVP baseline runtime source because the free version is limited to 12 hours and requires manual reactivation.
-- Remaining follow-up: find a real in-app CPU temperature source for this hardware. Since HWiNFO64 sees the data but shared memory is time-limited/manual in the free version, the preferred MVP route is newer/different LibreHardwareMonitor support for this board/CPU combination.
+- Elevated WD-HUD provider probe confirmed administrator rights unlock the CPU temperature: `CpuTemperatureC` around `66.75 °C`, with GPU temperature and NVIDIA dGPU selection still correct.
+- Decision: WD-HUD now requests administrator rights through its app manifest so the same LibreHardwareMonitor provider can read CPU temperature on this machine.
+- Constraint: the admin runtime decision does not relax the no-network, no-telemetry, no-updater, no-cloud, no-remote-config, and no-WebView baseline.
+- Manifest-built Release `WdHud.App.exe` started successfully; user-visible elevated HUD smoke test confirmed `CPU °C 66°C` and `GPU °C 40°C`.
+- Outbound Windows Defender Firewall block rule was created and verified for `src/WdHud.App/bin/Release/net10.0-windows/WdHud.App.exe`.
+
+## HUD Status Colors - 2026-07-04
+
+- Load values use blue below 20%, green from 20% to 69%, orange from 70% to 89%, and red from 90%.
+- Temperature values use blue below 45°C, green from 45°C to 74°C, orange from 75°C to 84°C, and red from 85°C.
+- Unknown values stay white and continue to render as `N/A`.
+- Threshold logic is covered by `HudMetricStatusPolicyTests`.
+- User-visible smoke test confirmed the colored HUD values render on the desktop.
+
+## Window And Startup Behavior - 2026-07-04
+
+- `StartWithWindows` defaults to enabled.
+- On load, WD-HUD registers the current `WdHud.App.exe` under the current user's Run key.
+- Startup registration points directly to the executable, not to `cmd`, PowerShell, or a wrapper script.
+- Fresh Release startup registration was verified in HKCU Run and points directly to the current Release `WdHud.App.exe`.
+- The HUD surface is draggable and saves its window position on exit.
+- The corner button minimizes the HUD to the notification area.
+- Closing the HUD window hides it to the notification area; the tray menu has `Open` and `Exit`.
+- User-visible smoke test confirmed drag movement and tray minimize/restore work.

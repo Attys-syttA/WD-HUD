@@ -172,6 +172,11 @@
       "tracked": true
     },
     {
+      "path": "src/WdHud.App/app.manifest",
+      "role": "source",
+      "tracked": true
+    },
+    {
       "path": "src/WdHud.App/App.xaml",
       "role": "source",
       "tracked": true
@@ -262,6 +267,16 @@
       "tracked": true
     },
     {
+      "path": "src/WdHud.Core/HudMetricSeverity.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/HudMetricStatusPolicy.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
       "path": "src/WdHud.Core/HudMetricsFormatter.cs",
       "role": "source",
       "tracked": true
@@ -318,6 +333,11 @@
     },
     {
       "path": "tests/WdHud.Tests/GpuSelectionPolicyTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/HudMetricStatusPolicyTests.cs",
       "role": "test",
       "tracked": true
     },

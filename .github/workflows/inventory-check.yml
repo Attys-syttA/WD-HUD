@@ -1,0 +1,22 @@
+name: Inventory Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory-check:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify repository file inventory
+        shell: pwsh
+        run: pwsh -File .\scripts\check-inventory.ps1

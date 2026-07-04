@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": ".editorconfig",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": ".env.example",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": ".gitattributes",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/build-check.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/encoding-check.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/inventory-check.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/secret-scan.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".github/workflows/security-scan.yml",
+      "role": "ci",
+      "tracked": true
+    },
+    {
+      "path": ".gitignore",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "AGENTS.md",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "CODEX_AGENT_PLAN.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "Directory.Build.props",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "Directory.Packages.props",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "docs/acceptance-checklist.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/architecture.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/CHANGELOG.dev.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/codex-tasks/README.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/manual-audit-checklist.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/security-baseline.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/source-audit.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/TERV_STATUS_SABLON.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "docs/threat-surface.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "tracked": true
+    },
+    {
+      "path": "repo-file-inventory.json",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "scripts/block-network.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/check-encoding.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/check-inventory.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/local-build.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/security-scan.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/unblock-network.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/update-inventory.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "scripts/verify-no-network.ps1",
+      "role": "tooling",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/App.xaml",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/App.xaml.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/DesignTimeSnapshotFactory.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/HudViewModel.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/MainWindow.xaml",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/MainWindow.xaml.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.App/WdHud.App.csproj",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/GpuSelectionMode.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/HudFieldVisibility.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/HudMetricsSnapshot.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/HudSettings.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/ISettingsStore.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/IStartupRegistrationService.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/ISystemMetricsProvider.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/IWindowBehaviorService.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Contracts/WdHud.Contracts.csproj",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/GpuCandidate.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/GpuSelectionPolicy.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/HudMetricsFormatter.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/HudMetricsNormalizer.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/HudSettingsValidator.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Core/WdHud.Core.csproj",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/DpiMonitorService.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/JsonSettingsStore.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/LibreHardwareMonitorMetricsProvider.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/WdHud.Infrastructure.csproj",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/WindowBehaviorService.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "src/WdHud.Infrastructure/WindowsStartupRegistrationService.cs",
+      "role": "source",
+      "tracked": true
+    },
+    {
+      "path": "STATE.md",
+      "role": "project",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/GpuSelectionPolicyTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/HudMetricsFormatterTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/HudSettingsValidatorTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/JsonSettingsStoreTests.cs",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "tests/WdHud.Tests/WdHud.Tests.csproj",
+      "role": "test",
+      "tracked": true
+    },
+    {
+      "path": "WD-HUD.sln",
+      "role": "project",
+      "tracked": true
+    }
+  ]
+}

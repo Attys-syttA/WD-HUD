@@ -1,0 +1,22 @@
+name: Encoding Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  encoding-check:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify encoding and line endings
+        shell: pwsh
+        run: pwsh -File .\scripts\check-encoding.ps1

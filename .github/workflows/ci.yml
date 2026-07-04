@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Restore
+        run: dotnet restore .\WD-HUD.sln
+      - name: Build
+        run: dotnet build .\WD-HUD.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test .\WD-HUD.sln --configuration Release --no-build
+      - name: Security scan
+        shell: pwsh
+        run: pwsh -File .\scripts\security-scan.ps1
+      - name: Inventory check
+        shell: pwsh
+        run: pwsh -File .\scripts\check-inventory.ps1
+      - name: Encoding check
+        shell: pwsh
+        run: pwsh -File .\scripts\check-encoding.ps1

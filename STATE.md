@@ -25,6 +25,7 @@
 - `StartWithWindows` now defaults to enabled and registers the current `WdHud.App.exe` under the current user's Run key.
 - Startup registration points directly at the `WinExe` app executable, not at `cmd`, PowerShell, or a wrapper script.
 - The HUD can be dragged, minimized to the notification area, restored from the tray icon, and exited from the tray menu.
+- GitHub Actions inventory failure on commit `1e5bb40` was diagnosed as non-deterministic filesystem-based inventory generation on the CI runner; `scripts/update-inventory.ps1` now uses `git ls-files`.
 - Remote is configured as `https://github.com/Attys-syttA/WD-HUD.git`.
 
 ## Recent Decisions
@@ -40,6 +41,7 @@
 - The first metrics provider is `LibreHardwareMonitorMetricsProvider`; it opens LibreHardwareMonitor lazily and returns `HudMetricsSnapshot.Empty(...)` if local sensor reading fails.
 - `HudMetricsNormalizer` clamps percent values and removes non-finite sensor values before the HUD formats them.
 - Manual smoke test on the target Windows machine found both `NVIDIA GeForce RTX 5080` and `AMD Radeon(TM) Graphics`; provider snapshot verification now selects the NVIDIA dGPU and reads GPU temperature.
+- Repository inventory is generated from tracked Git files, not from a raw filesystem crawl, to keep local and GitHub Actions checks aligned.
 
 ## Latest Validation
 
@@ -65,6 +67,7 @@
   - HKCU Run value `WD-HUD` was verified and points directly to the current Release `WdHud.App.exe`
   - user-visible smoke test confirmed drag movement and tray minimize/restore work
   - user-visible smoke test confirmed colored HUD values render as expected
+  - CI inventory fix validation passed after stopping the locally running HUD process: build, 26 tests, security scan, inventory check, encoding check, GitGuardian, and `git diff --check`
 - Manual smoke test:
   - Release `WdHud.App.exe` started and remained running.
   - Visible `WD-HUD` top-level WPF window was detected.
@@ -88,7 +91,7 @@
 
 ## Next Step
 
-- Commit and push the validated startup/tray/drag/status-color checkpoint after user confirmation.
+- Commit and push the CI inventory determinism fix, then verify GitHub Actions.
 - Continue to publish or commit only after user confirmation.
 
 ## Operational Notes

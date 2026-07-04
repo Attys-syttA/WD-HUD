@@ -4,17 +4,11 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $inventoryPath = Join-Path $repoRoot 'repo-file-inventory.json'
 
-$excludedDirectories = @('.git', '.serena', 'bin', 'obj', '.vs', 'node_modules')
-
-$files = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
-  Where-Object {
-    $relative = $_.FullName.Substring($repoRoot.Length + 1)
-    $segments = $relative -split '[\\/]'
-    -not ($segments | Where-Object { $excludedDirectories -contains $_ })
-  } |
-  Sort-Object FullName |
+$files = git -C $repoRoot ls-files |
+  Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+  Sort-Object |
   ForEach-Object {
-    $relative = $_.FullName.Substring($repoRoot.Length + 1).Replace('\', '/')
+    $relative = $_.Replace('\', '/')
     [pscustomobject]@{
       path = $relative
       role = if ($relative -like 'src/*') { 'source' }

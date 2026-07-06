@@ -67,7 +67,8 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
 
         var cpuUsage = 0d;
         var ramUsage = 0d;
-        double? cpuTemperature = null;
+        double? cpuTemperatureFromCpu = null;
+        double? cpuTemperatureFallback = null;
         var gpuCandidates = new List<GpuCandidate>();
 
         foreach (var hardware in computer.Hardware)
@@ -76,10 +77,13 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             {
                 case HardwareType.Cpu:
                     cpuUsage = ReadLoad(hardware) ?? cpuUsage;
-                    cpuTemperature = ReadTemperature(hardware) ?? cpuTemperature;
+                    cpuTemperatureFromCpu = ReadTemperature(hardware) ?? cpuTemperatureFromCpu;
                     break;
                 case HardwareType.Memory:
                     ramUsage = ReadLoad(hardware) ?? ramUsage;
+                    break;
+                case HardwareType.Motherboard:
+                    cpuTemperatureFallback = ReadCpuRelatedTemperature(hardware) ?? cpuTemperatureFallback;
                     break;
                 case HardwareType.GpuNvidia:
                 case HardwareType.GpuAmd:
@@ -93,6 +97,7 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             }
         }
 
+        var cpuTemperature = cpuTemperatureFromCpu ?? cpuTemperatureFallback;
         var selectedGpu = gpuSelectionPolicy.Select(gpuCandidates, gpuSelectionMode);
         var snapshot = new HudMetricsSnapshot(
             LocalTime: localTime,
@@ -136,6 +141,15 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             .Select(sensor => (sensor.Name, (double?)sensor.Value!.Value)));
     }
 
+    private static double? ReadCpuRelatedTemperature(IHardware hardware)
+    {
+        return SelectTemperature(
+            EnumerateSensors(hardware)
+            .Where(sensor => sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+            .Where(sensor => IsCpuTemperatureFallbackSensor(sensor.Name))
+            .Select(sensor => (sensor.Name, (double?)sensor.Value!.Value)));
+    }
+
     internal static double? SelectTemperature(IEnumerable<(string Name, double? Value)> sensors)
     {
         return sensors
@@ -143,6 +157,15 @@ public sealed class LibreHardwareMonitorMetricsProvider : ISystemMetricsProvider
             .OrderByDescending(sensor => TemperatureSensorPriority(sensor.Name))
             .Select(sensor => sensor.Value)
             .FirstOrDefault();
+    }
+
+    internal static bool IsCpuTemperatureFallbackSensor(string sensorName)
+    {
+        return sensorName.Contains("cpu", StringComparison.OrdinalIgnoreCase)
+            || sensorName.Contains("package", StringComparison.OrdinalIgnoreCase)
+            || sensorName.Contains("peci", StringComparison.OrdinalIgnoreCase)
+            || sensorName.Contains("tdie", StringComparison.OrdinalIgnoreCase)
+            || sensorName.Contains("tctl", StringComparison.OrdinalIgnoreCase);
     }
 
     private static IEnumerable<ISensor> EnumerateSensors(IHardware hardware)

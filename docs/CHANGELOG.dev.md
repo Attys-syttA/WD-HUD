@@ -1,5 +1,20 @@
 # CHANGELOG.dev
 
+## 2026-07-06 - Intel CPU temperature fallback path
+
+- Goal: improve CPU temperature detection on the Intel i7-13700KF machine where the HUD still showed `CPU N/A`.
+- Modified files: `Directory.Build.props`, `STATE.md`, `docs/CHANGELOG.dev.md`, `src/WdHud.Infrastructure/LibreHardwareMonitorMetricsProvider.cs`, `tests/WdHud.Tests/LibreHardwareMonitorMetricsProviderTests.cs`.
+- Commands/probes run:
+  - `C:\Program Files\dotnet\dotnet.exe --list-sdks`
+  - temporary raw LibreHardwareMonitor temperature probe on the Intel machine
+  - `dotnet build .\src\WdHud.Infrastructure\WdHud.Infrastructure.csproj --configuration Release`
+  - `dotnet test .\tests\WdHud.Tests\WdHud.Tests.csproj --configuration Release`
+  - `pwsh -File .\scripts\local-build.ps1`
+  - `git diff --check`
+- Result: the raw non-elevated probe on the Intel machine returned only NVIDIA GPU temperatures and no CPU temperatures at all. The provider now keeps the direct CPU read path, but also falls back to motherboard-exposed CPU-like temperature names such as `CPU`, `CPU Package`, and `CPU PECI` if the direct CPU branch is empty. Targeted validation passed: `32 passed`, full local build passed, and the visible Intel-machine smoke re-check confirmed the HUD now shows CPU temperature instead of `N/A`.
+- Version bump: `0.1.00008`, because runtime sensor-selection behavior changed.
+- Follow-up: do one cautious smoke re-check on the original AMD machine; if that unexpectedly regresses, roll back to the last green build and re-plan the cross-architecture CPU temperature policy.
+
 ## 2026-07-04 - CI inventory determinism fix
 
 - Goal: fix the GitHub Actions `Inventory Check` and aggregate `CI` failures on commit `1e5bb40`.

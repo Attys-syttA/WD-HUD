@@ -2,14 +2,20 @@
 
 ## Current State
 
-- Date: 2026-07-04
+- Date: 2026-07-06
 - Repo: `E:\codex_works\WD_HUD`
 - Phase: MVP scaffold through first visible HUD smoke test
-- Status: solution, projects, contracts, core logic, LibreHardwareMonitor metrics provider, null-safe snapshot normalization, WPF HUD shell, tests, docs, scripts, CI/workflows, inventory, first manual HUD smoke test, GPU temperature/dGPU selection bugfix, invalid CPU temperature filtering, explicit elevated runtime manifest, first status-color HUD values, startup registration, tray minimize/restore, and draggable HUD behavior are complete.
+- Status: solution, projects, contracts, core logic, LibreHardwareMonitor metrics provider, null-safe snapshot normalization, WPF HUD shell, tests, docs, scripts, CI/workflows, inventory, first manual HUD smoke test, GPU temperature/dGPU selection bugfix, invalid CPU temperature filtering, explicit elevated runtime manifest, first status-color HUD values, startup registration, tray minimize/restore, draggable HUD behavior, and an Intel-safe CPU temperature fallback path from motherboard-exposed CPU-named sensors are complete and validated on the current Intel machine.
 
 ## Open Items
 
 - .NET 10 SDK is installed. Local validation works through `scripts/local-build.ps1`; the script still prepends `C:\Program Files\dotnet` if the current shell PATH has not refreshed yet.
+- On the current Intel i7-13700KF machine, a raw non-elevated LibreHardwareMonitor probe returned no CPU temperature sensors at all; only the NVIDIA GPU temperature was visible in the probe.
+- The provider source now falls back to motherboard-exposed CPU-like temperature sensor names such as `CPU`, `CPU Package`, or `CPU PECI` if the direct CPU branch has no usable value.
+- Targeted validation for the fallback change is green (`32 passed`), and the full `WdHud.App.exe` rebuild completed after closing the running elevated HUD.
+- The current Intel machine visible smoke re-check is good: the HUD now shows a real CPU temperature (`CPU °C 56°C`) instead of `N/A`.
+- The direct CPU read path for the earlier AMD-targeted behavior remains intact; the new motherboard fallback is only used if the direct CPU branch has no usable value.
+- A cautious AMD re-check is still recommended on the original target machine. If that quick smoke shows a regression, revert to the last green build and re-plan a dual-architecture-safe sensor policy; this is considered unlikely based on the current logic.
 - Manual smoke test confirmed the visible WPF HUD starts, stays topmost, renders the expected fields, updates values, and tolerates unavailable sensors without crashing.
 - GPU temperature identification bug is fixed: `AMD Radeon(TM) Graphics` is now classified as integrated, so Auto mode selects the discrete `NVIDIA GeForce RTX 5080` when both GPUs are present.
 - CPU temperature no longer displays a false `0°C`; invalid zero temperature readings are filtered and shown as `N/A`.
@@ -46,15 +52,24 @@
 ## Latest Validation
 
 - Commands:
-  - `pwsh -File .\scripts\update-inventory.ps1`
+  - `C:\Program Files\dotnet\dotnet.exe --list-sdks`
+  - temporary raw LibreHardwareMonitor probe on the Intel machine
+  - `dotnet build .\src\WdHud.Infrastructure\WdHud.Infrastructure.csproj --configuration Release`
+  - `dotnet test .\tests\WdHud.Tests\WdHud.Tests.csproj --configuration Release`
   - `pwsh -File .\scripts\local-build.ps1`
+  - `pwsh -File .\scripts\update-inventory.ps1`
   - `ggshield secret scan path --recursive --yes --use-gitignore .`
 - Result:
-  - build succeeded
-  - tests passed: 26 passed, 0 failed
+  - .NET SDK present: `10.0.301`
+  - raw Intel-machine probe showed `GpuNvidia | NVIDIA GeForce RTX 3060` with `GPU Core` and `GPU Hot Spot`, but no CPU temperature sensors were returned in the non-elevated probe
+  - targeted infrastructure build succeeded
+  - targeted tests passed: `32 passed, 0 failed`
+  - full local build succeeded
+  - tests passed: `32 passed, 0 failed`
   - security scan passed
   - inventory check passed
   - encoding check passed
+  - visible Intel-machine smoke re-check confirmed the HUD now shows CPU temperature instead of `N/A`
   - GitGuardian scan found no secrets
   - app manifest build succeeded with administrator execution level
   - manifest-built Release `WdHud.App.exe` started successfully as a visible runtime smoke test
@@ -91,7 +106,7 @@
 
 ## Next Step
 
-- Commit and push the CI inventory determinism fix, then verify GitHub Actions.
+- Perform one cautious smoke re-check on the original AMD machine with the new build. If it unexpectedly regresses there, roll back to the last green build and re-plan the CPU temperature selection logic for both architectures.
 - Continue to publish or commit only after user confirmation.
 
 ## Operational Notes
